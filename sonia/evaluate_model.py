@@ -48,7 +48,10 @@ class EvaluateModel(object):
 
         self.sonia_model=sonia_model
         self.include_genes=include_genes
-        if processes is None: self.processes = mp.cpu_count()
+
+        # only count usable cpus
+        # (mp.cpu_count() returns total number of cpus even if not all are available e.g. when running on cluster)
+        if processes is None: self.processes = len(os.sched_getaffinity(0))
         else: self.processes = processes
 
         # define olga model
@@ -167,8 +170,7 @@ class EvaluateModel(object):
         l=len(features)
         two_points_marginals=np.zeros((l,l)) 
         n=len(seq_model_features)
-        procs = mp.cpu_count()
-        sizeSegment = int(n/procs)
+        sizeSegment = int(n/self.processes)
         
         if not use_flat_distribution:
             energies = self.sonia_model.compute_energy(seq_model_features)
@@ -178,9 +180,9 @@ class EvaluateModel(object):
             
         # Create size segments list
         jobs = []
-        for i in range(0, procs):
+        for i in range(0, self.processes):
             jobs.append([seq_model_features[i*sizeSegment:(i+1)*sizeSegment],Qs[i*sizeSegment:(i+1)*sizeSegment],np.zeros((l,l))])
-        p=mp.Pool(procs)
+        p=mp.Pool(self.processes)
         pool = p.map(partial_joint_marginals, jobs)
         p.close()
         Z=np.array(pool)[:,1].sum()
