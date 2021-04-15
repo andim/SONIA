@@ -69,8 +69,8 @@ def main():
     parser.add_option('-s','--chunk_size', type='int',metavar='N', dest='chunck_size', default = mp.cpu_count()*int(5e2), help='Number of sequences to evaluate at each iteration')
 
     #vj genes
-    parser.add_option('--v_in', '--v_mask_index', type='int', metavar='INDEX', dest='V_mask_index', default=1, help='specifies V_masks are found in column INDEX in the input file. Default is 1.')
-    parser.add_option('--j_in', '--j_mask_index', type='int', metavar='INDEX', dest='J_mask_index', default=2, help='specifies J_masks are found in column INDEX in the input file. Default is 2.')
+    parser.add_option('--v_in', '--v_mask_index', type='int', metavar='INDEX', dest='V_mask_index', default=None, help='specifies V_masks are found in column INDEX in the input file. Default is None (do not condition on J usage).')
+    parser.add_option('--j_in', '--j_mask_index', type='int', metavar='INDEX', dest='J_mask_index', default=None, help='specifies J_masks are found in column INDEX in the input file. Default is None (do not condition on J usage).')
     parser.add_option('--v_mask', type='string', dest='V_mask', help='specify V usage to condition as arguments.')
     parser.add_option('--j_mask', type='string', dest='J_mask', help='specify J usage to condition as arguments.')
 
@@ -239,7 +239,8 @@ def main():
         sonia_model.norm_productive=pgen_model.compute_regex_CDR3_template_pgen('CX{0,}')
 
     # load Evaluate model class
-    ev=EvaluateModel(sonia_model,custom_olga_model=pgen_model)
+    ev=EvaluateModel(sonia_model, custom_olga_model=pgen_model,
+                     include_genes=False if ((V_mask_index is None) and (J_mask_index is None)) else True)
 
     if options.infile_name is None: #No infile specified -- args should be the input seq
         print_warnings = True
@@ -344,7 +345,7 @@ def main():
 
             #Find and format V_usage_mask
             if V_mask_index is None:
-                V_usage_masks.append(None) #default mask
+                V_usage_masks.append(['']) #default mask
             else:
                 try:
                     V_usage_mask = split_line[V_mask_index].strip().split(gene_mask_delimiter)
@@ -365,7 +366,7 @@ def main():
 
             #Find and format J_usage_mask
             if J_mask_index is None:
-                J_usage_masks.append(None) #default mask
+                J_usage_masks.append(['']) #default mask
             else:
                 try:
                     J_usage_mask = split_line[J_mask_index].strip().split(gene_mask_delimiter)
@@ -431,3 +432,4 @@ def main():
 
 
 if __name__ == '__main__': main()
+
