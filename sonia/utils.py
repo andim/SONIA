@@ -10,6 +10,9 @@ import itertools
 from tensorflow.keras.callbacks import Callback
 import numpy as np
 
+import olga.utils
+
+
 def add_random_error(nt, p):
     """ Take a nucleotide seq then simulate a sequencing
     error on it. Explicitely, each nucleotide has a probability p
@@ -23,6 +26,8 @@ def add_random_error(nt, p):
 
 def gene_to_num_str(gene_name, gene_type):
     """Strips excess gene name info to number string.
+    Derived from olga.utils.gene_to_num_str.
+    Does not keep allele information.
 
     Parameters
     ----------
@@ -35,16 +40,8 @@ def gene_to_num_str(gene_name, gene_type):
     num_str : str
         Reduced gene or allele name with leading zeros and excess
         characters removed.
-
     """
-    # get rid of allele
-    gene_name = gene_name.split('*')[0]
-    # only keep first assigned gene
-    gene_name = gene_name.split('/')[0]
-    num_str = gene_type.lower().join([g.lstrip('0') for g in gene_name.lower().split(gene_type.lower())[1:]])
-    num_str = '-'.join([g.lstrip('0') for g in num_str.split('-')
-                        if not g == 'x']) # do not keep unassigned secondary classification
-    return gene_type.lower() + num_str.replace('/', '')
+    return olga.utils.gene_to_num_str(gene_name, gene_type, allele=False)
 
 def compute_pgen_expand(x):
     # compute pgen conditioned on gene usage
