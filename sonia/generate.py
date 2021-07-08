@@ -161,6 +161,7 @@ def main():
 
     if options.outfile_name is not None: #OUTFILE SPECIFIED
         with open(options.outfile_name,'w') as file:
+            file.write('amino_acid,V,J,nucleotide\n')
             to_generate=chuncks(options.num_seqs_to_generate,options.chunck_size)
             for t in tqdm(to_generate):
                 if options.pgen:
