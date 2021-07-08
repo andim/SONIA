@@ -43,7 +43,7 @@ def gene_to_num_str(gene_name, gene_type):
     gene_name = gene_name.split('/')[0]
     num_str = gene_type.lower().join([g.lstrip('0') for g in gene_name.lower().split(gene_type.lower())[1:]])
     num_str = '-'.join([g.lstrip('0') for g in num_str.split('-')
-                        if not g == 'X']) # do not keep unassigned secondary classification
+                        if not g == 'x']) # do not keep unassigned secondary classification
     return gene_type.lower() + num_str.replace('/', '')
 
 def compute_pgen_expand(x):
